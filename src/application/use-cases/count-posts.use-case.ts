@@ -1,22 +1,18 @@
 import type { IPostReader } from "@/domain/types/repositories/post-reader.interface";
-import { PaginationService } from "@caffeine/api-utils/services";
-
-type ICountPosts = {
-	totalPages: number;
-	count: number;
-};
+import { GetNumberOfPagesService } from "@caffeine/application/services";
+import type { ICountItems } from "@caffeine/application/types";
 
 export class CountPostsUseCase {
-	public constructor(private readonly repository: IPostReader) {}
+    public constructor(private readonly reader: IPostReader) {}
 
-	public async run(postTypeId?: string): Promise<ICountPosts> {
-		const count = await (postTypeId
-			? this.repository.countByPostType(postTypeId)
-			: this.repository.count());
+    public async run(postTypeId?: string): Promise<ICountItems> {
+        const count = await (postTypeId
+            ? this.reader.countByPostType(postTypeId)
+            : this.reader.count());
 
-		return {
-			totalPages: PaginationService.run(count),
-			count,
-		};
-	}
+        return {
+            totalPages: GetNumberOfPagesService.run(count),
+            count,
+        };
+    }
 }

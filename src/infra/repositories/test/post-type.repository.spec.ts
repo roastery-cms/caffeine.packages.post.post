@@ -3,9 +3,9 @@ import { faker } from "@faker-js/faker";
 import { PostTypeRepository } from "./post-type.repository";
 import type { IUnmountedPostType } from "@caffeine-packages/post.post-type/domain/types";
 import { t } from "@caffeine/models";
-import { Schema } from "@caffeine/models/schema";
-import { generateUUID } from "@caffeine/models/helpers";
-import { makeEntityFactory } from "@caffeine/models/factories";
+import { generateUUID } from "@caffeine/entity/helpers";
+import { makeEntityFactory } from "@caffeine/entity/factories";
+import { Schema } from "@caffeine/schema";
 
 describe("PostTypeRepository", () => {
 	let repository: PostTypeRepository;

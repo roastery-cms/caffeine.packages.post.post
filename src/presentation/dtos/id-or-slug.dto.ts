@@ -1,5 +1,5 @@
-import { t } from "@caffeine/models";
 import { UuidDTO } from "@caffeine/models/dtos/primitives";
+import { t } from "@caffeine/models";
 
 export const SlugDTO = t.String({
 	pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",

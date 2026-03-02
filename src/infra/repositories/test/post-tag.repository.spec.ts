@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { faker } from "@faker-js/faker";
 import { PostTagRepository } from "./post-tag.repository";
 import type { IUnmountedPostTag } from "@caffeine-packages/post.post-tag/domain/types";
-import { generateUUID } from "@caffeine/models/helpers";
-import { makeEntityFactory } from "@caffeine/models/factories";
+import { generateUUID } from "@caffeine/entity/helpers";
+import { makeEntityFactory } from "@caffeine/entity/factories";
 
 describe("PostTagRepository", () => {
 	let repository: PostTagRepository;

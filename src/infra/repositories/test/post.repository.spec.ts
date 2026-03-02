@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { faker } from "@faker-js/faker";
 import { PostRepository } from "./post.repository";
-import { generateUUID } from "@caffeine/models/helpers";
-import { makeEntityFactory } from "@caffeine/models/factories";
+import { generateUUID } from "@caffeine/entity/helpers";
+import { makeEntityFactory } from "@caffeine/entity/factories";
 import type { BuildPostDTO } from "@/domain/dtos/build-post.dto";
 import { Post } from "@/domain";
 import { MAX_ITEMS_PER_QUERY } from "@caffeine/constants";

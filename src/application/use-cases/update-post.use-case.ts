@@ -1,57 +1,59 @@
-import type { IPostRepository } from "@/domain/types/repositories/post-repository.interface";
-import type { UpdatePostDTO } from "../dtos/update-post.dto";
-import type { ICompletePost } from "../types/complete-post.interface";
-
+import type { IPostWriter } from "@/domain/types/repositories/post-writer.interface";
+import type { IPostUniquenessCheckerService } from "@/domain/types/services";
+import type { UpdatePostDTO } from "../dtos";
+import type { IPost } from "@/domain/types";
+import type { FindPostUseCase } from "./find-post.use-case";
 import {
-	ResourceAlreadyExistsException,
-	ResourceNotFoundException,
+    ResourceAlreadyExistsException,
+    ResourceNotFoundException,
 } from "@caffeine/errors/application";
-import type { PostUniquenessChecker } from "@/domain/services/post-uniqueness-checker.service";
-import { slugify } from "@caffeine/models/helpers";
-import type { PopulatePostService } from "../services/populate-post.service";
-import { detectEntry } from "@caffeine/api-utils/utils";
+import { Post } from "@/domain";
+import { EntitySource } from "@caffeine/entity/symbols";
+import type { FindManyPostTagsService } from "../services";
+import { slugify } from "@caffeine/entity/helpers";
 
 export class UpdatePostUseCase {
-	public constructor(
-		private readonly repository: IPostRepository,
-		private readonly postUniquenessChecker: PostUniquenessChecker,
-		private readonly populatePost: PopulatePostService,
-	) {}
+    public constructor(
+        private readonly writer: IPostWriter,
+        private readonly findPost: FindPostUseCase,
+        private readonly findPostTags: FindManyPostTagsService,
+        private readonly postUniquenessChecker: IPostUniquenessCheckerService,
+    ) {}
 
-	public async run(
-		id: string,
-		{ cover, description, name, tags: _tags }: UpdatePostDTO,
-	): Promise<ICompletePost> {
-		const _targetPost =
-			detectEntry(id) === "UUID"
-				? await this.repository.findById(id)
-				: await this.repository.findBySlug(id);
+    public async run(
+        idOrSlug: string,
+        { cover, description, name, tags: _tags }: UpdatePostDTO,
+        updateSlug: boolean = false,
+    ): Promise<IPost> {
+        const targetPost = await this.findPost.run(idOrSlug);
 
-		if (!_targetPost) throw new ResourceNotFoundException("post@post");
+        if (!targetPost)
+            throw new ResourceNotFoundException(Post[EntitySource]);
 
-		const targetPost = _targetPost;
+        if (name) targetPost.rename(name);
+        if (name && updateSlug) {
+            await this.validateSlugUniqueness(targetPost, name);
+            targetPost.reslug(name);
+        }
+        if (description) targetPost.updateDescription(description);
+        if (cover) targetPost.updateCover(cover);
+        if (_tags) {
+            const tags = await this.findPostTags.run(_tags);
+            targetPost.updateTags(tags);
+        }
 
-		if (name && name !== targetPost.name) {
-			const newSlug = slugify(name);
+        await this.writer.update(targetPost);
 
-			if (newSlug !== targetPost.slug) {
-				if (!(await this.postUniquenessChecker.run(newSlug)))
-					throw new ResourceAlreadyExistsException(
-						`post@post::slug->${newSlug}`,
-					);
-			}
+        return targetPost;
+    }
 
-			targetPost.rename(name);
-		}
+    private async validateSlugUniqueness(post: IPost, value: string) {
+        value = slugify(value);
+        if (post.slug === value) return;
 
-		if (description) targetPost.updateDescription(description);
-		if (cover) targetPost.updateCover(cover);
-		if (_tags) targetPost.updateTags(_tags);
+        const isUnique = await this.postUniquenessChecker.run(value);
 
-		const completePost = await this.populatePost.run(targetPost);
-
-		await this.repository.update(targetPost);
-
-		return completePost;
-	}
+        if (!isUnique)
+            throw new ResourceAlreadyExistsException(Post[EntitySource]);
+    }
 }

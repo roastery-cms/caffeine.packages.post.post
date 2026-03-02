@@ -1,70 +1,77 @@
 {
-  "name": "@caffeine-packages/post.post",
-  "version": "0.0.1",
-  "type": "module",
-  "author": {
-    "name": "Alan Reis",
-    "email": "alanreisanjo@gmail.com",
-    "url": "https://hoyasumii.dev"
-  },
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/*/index.d.ts"
-      ]
-    }
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+    "name": "@caffeine-packages/post.post",
+    "version": "0.0.2",
+    "type": "module",
+    "author": {
+        "name": "Alan Reis",
+        "email": "alanreisanjo@gmail.com",
+        "url": "https://hoyasumii.dev"
     },
-    "./*": {
-      "types": "./dist/*/index.d.ts",
-      "import": "./dist/*/index.js",
-      "require": "./dist/*/index.cjs"
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "typesVersions": {
+        "*": {
+            "*": [
+                "./dist/*/index.d.ts"
+            ]
+        }
+    },
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs"
+        },
+        "./*": {
+            "types": "./dist/*/index.d.ts",
+            "import": "./dist/*/index.js",
+            "require": "./dist/*/index.cjs"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsup 'src/**/index.ts' --format cjs,esm --dts --tsconfig tsconfig.build.json --clean",
+        "test:unit": "bun test --env-file=.env.testing",
+        "test:coverage": "bun test --env-file=.env.testing --coverage",
+        "setup": "bun run build && bun link",
+        "start:dev": "bun --watch src/presentation/dev/index.ts",
+        "prepare": "husky"
+    },
+    "devDependencies": {
+        "@faker-js/faker": "^10.2.0",
+        "@types/bun": "latest",
+        "tsup": "^8.5.1",
+        "@caffeine/schema": "link:@caffeine/schema",
+        "@commitlint/cli": "^20.4.1",
+        "@commitlint/config-conventional": "^20.4.1",
+        "husky": "^9.1.7",
+        "@elysiajs/eden": "^1.4.6"
+    },
+    "peerDependencies": {
+        "typescript": "^5",
+        "elysia": "^1.4.26",
+        "@caffeine/schema": "link:@caffeine/schema"
+    },
+    "dependencies": {
+        "@caffeine-adapters/post": "link:@caffeine-adapters/post",
+        "@caffeine-packages/post.post-tag": "link:@caffeine-packages/post.post-tag",
+        "@caffeine-packages/post.post-type": "link:@caffeine-packages/post.post-type",
+        "@caffeine/api-docs": "link:@caffeine/api-docs",
+        "@caffeine/api-error-handler": "link:@caffeine/api-error-handler",
+        "@caffeine/api-response-mapper": "link:@caffeine/api-response-mapper",
+        "@caffeine/application": "link:@caffeine/application",
+        "@caffeine/auth": "link:@caffeine/auth",
+        "@caffeine/cache": "link:@caffeine/cache",
+        "@caffeine/constants": "link:@caffeine/constants",
+        "@caffeine/domain": "link:@caffeine/domain",
+        "@caffeine/entity": "link:@caffeine/entity",
+        "@caffeine/env": "link:@caffeine/env",
+        "@caffeine/errors": "link:@caffeine/errors",
+        "@caffeine/models": "link:@caffeine/models",
+        "@caffeine/presentation": "link:@caffeine/presentation",
+        "@caffeine/value-objects": "link:@caffeine/value-objects"
     }
-  },
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "tsup 'src/**/index.ts' --format cjs,esm --dts --tsconfig tsconfig.build.json --clean",
-    "test:unit": "vitest run",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage",
-    "setup": "bun run build && bun link",
-    "start:dev": "bun --watch src/presentation/dev/index.ts"
-  },
-  "devDependencies": {
-    "@faker-js/faker": "^10.2.0",
-    "@types/bun": "latest",
-    "@vitest/coverage-v8": "^4.0.18",
-    "@vitest/ui": "^4.0.18",
-    "tsup": "^8.5.1",
-    "vite-tsconfig-paths": "^6.0.5",
-    "vitest": "^4.0.18"
-  },
-  "peerDependencies": {
-    "typescript": "^5",
-    "elysia": "^1.4.22"
-  },
-  "dependencies": {
-    "@caffeine-packages/post.db.prisma-drive": "link:@caffeine-packages/post.db.prisma-drive",
-    "@caffeine-packages/post.post-tag": "link:@caffeine-packages/post.post-tag",
-    "@caffeine-packages/post.post-type": "link:@caffeine-packages/post.post-type",
-    "@caffeine/api-utils": "link:@caffeine/api-utils",
-    "@caffeine/auth": "link:@caffeine/auth",
-    "@caffeine/constants": "link:@caffeine/constants",
-    "@caffeine/errors": "link:@caffeine/errors",
-    "@caffeine/models": "link:@caffeine/models",
-    "@caffeine/redis-drive": "link:@caffeine/redis-drive",
-    "@elysiajs/eden": "^1.4.6",
-    "@elysiajs/openapi": "^1.4.14",
-    "elysia": "^1.4.22"
-  }
 }

@@ -1,126 +1,103 @@
-import { Entity } from "@caffeine/models";
-import type { EntityDTO } from "@caffeine/models/dtos";
-import { makeEntityFactory } from "@caffeine/models/factories";
-import type { BuildPostDTO } from "./dtos/build-post.dto";
 import type { IPost } from "./types";
+import { Entity } from "@caffeine/entity";
+import { UnpackedPostSchema } from "./schemas";
+import type { IPostTag } from "@caffeine-packages/post.post-tag/domain/types";
+import type { IPostType } from "@caffeine-packages/post.post-type/domain/types";
 import {
-	DefinedStringVO,
-	UrlVO,
-	UuidArrayVO,
-	SlugVO,
-} from "@caffeine/models/value-objects";
+    EntityContext,
+    EntitySchema,
+    EntitySource,
+} from "@caffeine/entity/symbols";
+import type { Schema } from "@caffeine/schema";
+import { DefinedStringVO, SlugVO, UrlVO } from "@caffeine/value-objects";
+import type { EntityDTO } from "@caffeine/entity/dtos";
+import type { IRawPost } from "./types/raw-post.interface";
+import { AutoUpdate } from "@caffeine/entity/decorators";
+import { makeEntity } from "@caffeine/entity/factories";
 
-export class Post extends Entity implements IPost {
-	public readonly postTypeId: string;
-	private _name: DefinedStringVO;
-	private _slug: SlugVO;
-	private _description: DefinedStringVO;
-	private _cover: UrlVO;
-	private _tags: UuidArrayVO;
+export class Post extends Entity<UnpackedPostSchema> implements IPost {
+    public override readonly [EntitySource]: string = "post@post";
+    public static readonly [EntitySource]: string = "post@post";
+    public override readonly [EntitySchema]: Schema<UnpackedPostSchema> =
+        UnpackedPostSchema;
 
-	public get name(): string {
-		return this._name.value;
-	}
+    private _name: DefinedStringVO;
+    private _slug: SlugVO;
+    private _description: DefinedStringVO;
+    private _cover: UrlVO;
+    private _type: IPostType;
+    private _tags: IPostTag[];
 
-	public get slug(): string {
-		return this._slug.value;
-	}
+    private constructor(
+        { cover, description, tags, type, name, slug }: IRawPost,
+        entityProps: EntityDTO,
+    ) {
+        super(entityProps);
 
-	public get description(): string {
-		return this._description.value;
-	}
+        this._name = DefinedStringVO.make(name, this[EntityContext]("name"));
+        this._slug = SlugVO.make(slug ?? name, this[EntityContext]("slug"));
+        this._description = DefinedStringVO.make(
+            description,
+            this[EntityContext]("description"),
+        );
+        this._cover = UrlVO.make(cover, this[EntityContext]("cover"));
+        this._type = type;
+        this._tags = tags;
+    }
 
-	public get cover(): string {
-		return this._cover.value;
-	}
+    public static make(initialProps: IRawPost, entityProps?: EntityDTO): IPost {
+        return new Post(initialProps, entityProps ?? makeEntity());
+    }
 
-	public get tags(): string[] {
-		return this._tags.value;
-	}
+    @AutoUpdate
+    rename(value: string): void {
+        this._name = DefinedStringVO.make(value, this[EntityContext]("name"));
+    }
 
-	private constructor(
-		{ postTypeId, cover, description, name, tags }: BuildPostDTO,
-		entityProps: EntityDTO,
-	) {
-		super(entityProps);
+    @AutoUpdate
+    reslug(value: string): void {
+        this._slug = SlugVO.make(value, this[EntityContext]("slug"));
+    }
 
-		this.postTypeId = postTypeId;
+    @AutoUpdate
+    updateDescription(value: string): void {
+        this._description = DefinedStringVO.make(
+            value,
+            this[EntityContext]("description"),
+        );
+    }
 
-		this._cover = UrlVO.make(cover, {
-			name: "cover",
-			layer: "post@post",
-		});
+    @AutoUpdate
+    updateCover(value: string): void {
+        this._cover = UrlVO.make(value, this[EntityContext]("cover"));
+    }
 
-		this._description = DefinedStringVO.make(description, {
-			name: "description",
-			layer: "post@post",
-		});
+    @AutoUpdate
+    updateTags(values: IPostTag[]): void {
+        this._tags = values;
+    }
 
-		this._name = DefinedStringVO.make(name, {
-			name: "name",
-			layer: "post@post",
-		});
+    get name(): string {
+        return this._name.value;
+    }
 
-		this._slug = SlugVO.make(name, {
-			name: "slug",
-			layer: "post@post",
-		});
+    get slug(): string {
+        return this._slug.value;
+    }
 
-		this._tags = UuidArrayVO.make(tags, {
-			name: "tags",
-			layer: "post@post",
-		});
-	}
+    get description(): string {
+        return this._description.value;
+    }
 
-	rename(value: string): void {
-		this._name = DefinedStringVO.make(value, {
-			name: "name",
-			layer: "post@post",
-		});
+    get cover(): string {
+        return this._cover.value;
+    }
 
-		this._slug = SlugVO.make(value, {
-			name: "slug",
-			layer: "post@post",
-		});
+    get tags(): IPostTag[] {
+        return this._tags;
+    }
 
-		this.update();
-	}
-
-	updateDescription(value: string): void {
-		this._description = DefinedStringVO.make(value, {
-			name: "description",
-			layer: "post@post",
-		});
-
-		this.update();
-	}
-
-	updateCover(value: string): void {
-		this._cover = UrlVO.make(value, {
-			name: "cover",
-			layer: "post@post",
-		});
-
-		this.update();
-	}
-
-	updateTags(values: string[]): void {
-		this._tags = UuidArrayVO.make(values, {
-			name: "tags",
-			layer: "post@post",
-		});
-
-		this.update();
-	}
-
-	public static make(
-		initialProperties: BuildPostDTO,
-		entityProps?: EntityDTO,
-	): IPost {
-		entityProps = entityProps ?? makeEntityFactory();
-
-		Entity.prepare(entityProps);
-
-		return new Post(initialProperties, entityProps);
-	}
+    get type(): IPostType {
+        return this._type;
+    }
 }

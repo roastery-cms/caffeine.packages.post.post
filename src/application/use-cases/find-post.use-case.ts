@@ -1,23 +1,29 @@
 import { ResourceNotFoundException } from "@caffeine/errors/application";
-import type { ICompletePost } from "../types/complete-post.interface";
-import type { PopulatePostService } from "../services/populate-post.service";
 import type { IPostReader } from "@/domain/types/repositories/post-reader.interface";
-import { detectEntry } from "@caffeine/api-utils/utils";
+import type { IPost } from "@/domain/types";
+import type { UnpackedPostDTO } from "@/domain/dtos";
+import type { FindEntityByTypeUseCase } from "@caffeine/application/use-cases";
+import { Post } from "@/domain";
+import { EntitySource } from "@caffeine/entity/symbols";
 
 export class FindPostUseCase {
-	public constructor(
-		private readonly repository: IPostReader,
-		private readonly populatePost: PopulatePostService,
-	) {}
+    public constructor(
+        private readonly findPostByType: FindEntityByTypeUseCase<
+            typeof UnpackedPostDTO,
+            IPost,
+            IPostReader
+        >,
+    ) {}
 
-	public async run(id: string): Promise<ICompletePost> {
-		const targetPost =
-			detectEntry(id) === "UUID"
-				? await this.repository.findById(id)
-				: await this.repository.findBySlug(id);
+    public async run(idOrSlug: string): Promise<IPost> {
+        const targetPost = await this.findPostByType.run(
+            idOrSlug,
+            Post[EntitySource],
+        );
 
-		if (!targetPost) throw new ResourceNotFoundException(`post@post`);
+        if (!targetPost)
+            throw new ResourceNotFoundException(Post[EntitySource]);
 
-		return await this.populatePost.run(targetPost);
-	}
+        return targetPost;
+    }
 }

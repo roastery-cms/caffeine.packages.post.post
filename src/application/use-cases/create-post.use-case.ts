@@ -1,29 +1,33 @@
-import type { CreatePostDTO } from "../dtos/create-post.dto";
-import type { PostUniquenessChecker } from "@/domain/services/post-uniqueness-checker.service";
-import { slugify } from "@caffeine/models/helpers";
+import type { IPostUniquenessCheckerService } from "@/domain/types/services";
+import type { CreatePostDTO } from "../dtos";
+import type { IPost } from "@/domain/types";
+import { Post } from "@/domain";
+import type { FindManyPostTagsService, FindPostTypeService } from "../services";
 import { ResourceAlreadyExistsException } from "@caffeine/errors/application";
-import { Post } from "@/domain/post";
-import type { ICompletePost } from "../types/complete-post.interface";
-import type { PopulatePostService } from "../services/populate-post.service";
-import type { IPostRepository } from "@/domain/types/repositories/post-repository.interface";
+import type { IPostWriter } from "@/domain/types/repositories/post-writer.interface";
+import { EntitySource } from "@caffeine/entity/symbols";
 
 export class CreatePostUseCase {
-	public constructor(
-		private readonly repository: IPostRepository,
-		private readonly uniquenessChecker: PostUniquenessChecker,
-		private readonly populatePost: PopulatePostService,
-	) {}
+    public constructor(
+        private readonly writer: IPostWriter,
+        private readonly uniquenessChecker: IPostUniquenessCheckerService,
+        private readonly findPostType: FindPostTypeService,
+        private readonly findManyPostTags: FindManyPostTagsService,
+    ) {}
 
-	public async run(data: CreatePostDTO): Promise<ICompletePost> {
-		if (!(await this.uniquenessChecker.run(slugify(data.name))))
-			throw new ResourceAlreadyExistsException("post@post");
+    public async run(data: CreatePostDTO): Promise<IPost> {
+        const { postTypeId, tags: postTagsIds, ...properties } = data;
 
-		const targetPost = Post.make(data);
+        const type = await this.findPostType.run(data.postTypeId);
+        const tags = await this.findManyPostTags.run(postTagsIds);
 
-		const completePost = await this.populatePost.run(targetPost);
+        const targetPost = Post.make({ type, tags, ...properties });
 
-		await this.repository.create(targetPost);
+        if (!(await this.uniquenessChecker.run(targetPost.slug)))
+            throw new ResourceAlreadyExistsException(Post[EntitySource]);
 
-		return completePost;
-	}
+        await this.writer.create(targetPost);
+
+        return targetPost;
+    }
 }
