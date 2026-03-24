@@ -1,12 +1,12 @@
-import { t } from "@caffeine/models";
-import { RepositoryProviderDTO } from "../factories/repositories/dtos";
-import { UrlDTO } from "@caffeine/models/dtos/primitives";
+import { UrlDTO } from "@roastery/beans/collections/dtos";
+import { PostRepositoryProviderDTO } from "../factories/repositories/dtos";
+import { t } from "@roastery/terroir";
 
-export const PostTypeDependenciesDTO = t.Object({
-    DATABASE_URL: t.Optional(t.String()),
-    DATABASE_PROVIDER: t.Optional(RepositoryProviderDTO),
-    POST_TYPE_BASE_URL: t.Optional(UrlDTO),
-    POST_TAG_BASE_URL: t.Optional(UrlDTO),
+export const PostDependenciesDTO = t.Object({
+	DATABASE_URL: t.Optional(t.String()),
+	DATABASE_PROVIDER: t.Optional(PostRepositoryProviderDTO),
+	POST_TYPE_BASE_URL: t.Optional(UrlDTO),
+	POST_TAG_BASE_URL: t.Optional(UrlDTO),
 });
 
-export type PostTypeDependenciesDTO = t.Static<typeof PostTypeDependenciesDTO>;
+export type PostDependenciesDTO = t.Static<typeof PostDependenciesDTO>;

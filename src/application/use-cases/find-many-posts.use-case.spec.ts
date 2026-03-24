@@ -1,25 +1,12 @@
 import { describe, expect, it, beforeEach } from "bun:test";
 import { FindManyPostsUseCase } from "./find-many-posts.use-case";
+import { CountPostsUseCase } from "./count-posts.use-case";
 import { PostRepository } from "@/infra/repositories/test/post.repository";
 import { PostTypeRepository } from "@/infra/repositories/test/post-type.repository";
 import { FindPostTypeService } from "../services/find-post-type.service";
-import { ResourceNotFoundException } from "@caffeine/errors/application";
 import { Post } from "@/domain";
-import type { IPostTag } from "@caffeine-packages/post.post-tag/domain/types";
-import type { IPostType } from "@caffeine-packages/post.post-type/domain/types";
-
-const mockPostTag = (overrides?: Partial<IPostTag>): IPostTag =>
-	({
-		id: "tag-id",
-		name: "Tech",
-		slug: "tech",
-		hidden: false,
-		createdAt: new Date().toISOString(),
-		rename() {},
-		reslug() {},
-		changeVisibility() {},
-		...overrides,
-	}) as IPostTag;
+import type { IPostType } from "@roastery-capsules/post.post-type/domain/types";
+import { ResourceNotFoundException } from "@roastery/terroir/exceptions/application";
 
 const mockPostType = (overrides?: Partial<IPostType>): IPostType =>
 	({
@@ -47,7 +34,8 @@ describe("FindManyPostsUseCase", () => {
 		postTypeRepository = new PostTypeRepository();
 
 		const findPostType = new FindPostTypeService(postTypeRepository);
-		sut = new FindManyPostsUseCase(postRepository, findPostType);
+		const countPosts = new CountPostsUseCase(postRepository);
+		sut = new FindManyPostsUseCase(postRepository, findPostType, countPosts);
 
 		postTypeRepository.seed([typeA, typeB]);
 	});
@@ -74,7 +62,8 @@ describe("FindManyPostsUseCase", () => {
 
 		const result = await sut.run(1);
 
-		expect(result).toHaveLength(2);
+		expect(result.value).toHaveLength(2);
+		expect(result.count).toBe(2);
 	});
 
 	it("should return only posts matching the given post type id", async () => {
@@ -99,8 +88,9 @@ describe("FindManyPostsUseCase", () => {
 
 		const result = await sut.run(1, "type-a");
 
-		expect(result).toHaveLength(1);
-		expect(result[0].type.id).toBe("type-a");
+		expect(result.value).toHaveLength(1);
+		expect(result.value[0]!.type.id).toBe("type-a");
+		expect(result.count).toBe(1);
 	});
 
 	it("should resolve post type by slug before filtering", async () => {
@@ -116,7 +106,8 @@ describe("FindManyPostsUseCase", () => {
 
 		const result = await sut.run(1, "blog");
 
-		expect(result).toHaveLength(1);
+		expect(result.value).toHaveLength(1);
+		expect(result.value[0]!.type.id).toBe("type-a");
 	});
 
 	it("should throw ResourceNotFoundException when post type is not found", async () => {
@@ -125,13 +116,14 @@ describe("FindManyPostsUseCase", () => {
 		);
 	});
 
-	it("should return empty array when no posts exist", async () => {
+	it("should return empty result when no posts exist", async () => {
 		const result = await sut.run(1);
 
-		expect(result).toEqual([]);
+		expect(result.value).toEqual([]);
+		expect(result.count).toBe(0);
 	});
 
-	it("should return empty array for a page beyond existing data", async () => {
+	it("should return empty value for a page beyond existing data", async () => {
 		await postRepository.create(
 			Post.make({
 				name: "Post A",
@@ -144,6 +136,7 @@ describe("FindManyPostsUseCase", () => {
 
 		const result = await sut.run(999);
 
-		expect(result).toEqual([]);
+		expect(result.value).toEqual([]);
+		expect(result.count).toBe(1);
 	});
 });

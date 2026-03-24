@@ -2,8 +2,8 @@ import { describe, expect, it, beforeEach } from "bun:test";
 import { CountPostsUseCase } from "./count-posts.use-case";
 import { PostRepository } from "@/infra/repositories/test/post.repository";
 import { Post } from "@/domain";
-import type { IPostTag } from "@caffeine-packages/post.post-tag/domain/types";
-import type { IPostType } from "@caffeine-packages/post.post-type/domain/types";
+import type { IPostType } from "@roastery-capsules/post.post-type/domain/types";
+import type { IPostTag } from "@roastery-capsules/post.post-tag/domain/types";
 
 const mockPostTag = (overrides?: Partial<IPostTag>): IPostTag =>
 	({

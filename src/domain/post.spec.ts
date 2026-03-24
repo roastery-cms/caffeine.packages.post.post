@@ -1,10 +1,11 @@
 import { describe, expect, it } from "bun:test";
 import { Post } from "./post";
-import { InvalidPropertyException } from "@caffeine/errors/domain";
 import type { IRawPost } from "./types/raw-post.interface";
-import type { IPostTag } from "@caffeine-packages/post.post-tag/domain/types";
-import type { IPostType } from "@caffeine-packages/post.post-type/domain/types";
-import { makeEntity } from "@caffeine/entity/factories";
+import type { IConstructorPost } from "./types";
+import type { IPostTag } from "@roastery-capsules/post.post-tag/domain/types";
+import type { IPostType } from "@roastery-capsules/post.post-type/domain/types";
+import { makeEntity } from "@roastery/beans/entity/factories";
+import { InvalidPropertyException } from "@roastery/terroir/exceptions/domain";
 
 const mockPostTag = (overrides?: Partial<IPostTag>): IPostTag =>
 	({
@@ -32,7 +33,7 @@ const mockPostType = (overrides?: Partial<IPostType>): IPostType =>
 		...overrides,
 	}) as IPostType;
 
-const makeValidProps = (overrides?: Partial<IRawPost>): IRawPost => ({
+const makeValidProps = (overrides?: Partial<IRawPost>): IConstructorPost => ({
 	name: "My First Post",
 	description: "A description",
 	cover: "https://example.com/image.jpg",
@@ -143,7 +144,9 @@ describe("Post Entity", () => {
 		it("should throw InvalidPropertyException for empty description", () => {
 			const post = Post.make(makeValidProps()) as Post;
 
-			expect(() => post.updateDescription("")).toThrow(InvalidPropertyException);
+			expect(() => post.updateDescription("")).toThrow(
+				InvalidPropertyException,
+			);
 		});
 	});
 
@@ -168,7 +171,9 @@ describe("Post Entity", () => {
 		it("should throw InvalidPropertyException for invalid cover url", () => {
 			const post = Post.make(makeValidProps()) as Post;
 
-			expect(() => post.updateCover("invalid-url")).toThrow(InvalidPropertyException);
+			expect(() => post.updateCover("invalid-url")).toThrow(
+				InvalidPropertyException,
+			);
 		});
 	});
 

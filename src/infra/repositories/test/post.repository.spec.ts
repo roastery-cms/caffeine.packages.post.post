@@ -1,11 +1,11 @@
 import { describe, expect, it, beforeEach } from "bun:test";
 import { PostRepository } from "./post.repository";
 import { Post } from "@/domain";
-import type { IPost } from "@/domain/types";
+import type { IConstructorPost, IPost } from "@/domain/types";
 import type { IRawPost } from "@/domain/types/raw-post.interface";
-import type { IPostTag } from "@caffeine-packages/post.post-tag/domain/types";
-import type { IPostType } from "@caffeine-packages/post.post-type/domain/types";
-import { ConflictException } from "@caffeine/errors/infra";
+import type { IPostTag } from "@roastery-capsules/post.post-tag/domain/types";
+import type { IPostType } from "@roastery-capsules/post.post-type/domain/types";
+import { ConflictException } from "@roastery/terroir/exceptions/infra";
 
 const mockPostTag = (overrides?: Partial<IPostTag>): IPostTag =>
 	({
@@ -33,7 +33,7 @@ const mockPostType = (overrides?: Partial<IPostType>): IPostType =>
 		...overrides,
 	}) as IPostType;
 
-const makeValidProps = (overrides?: Partial<IRawPost>): IRawPost => ({
+const makeValidProps = (overrides?: Partial<IRawPost>): IConstructorPost => ({
 	name: "My First Post",
 	description: "A description",
 	cover: "https://example.com/image.jpg",
@@ -65,9 +65,7 @@ describe("PostRepository", () => {
 			const post = makePost();
 			await repository.create(post);
 
-			expect(repository.create(post)).rejects.toBeInstanceOf(
-				ConflictException,
-			);
+			expect(repository.create(post)).rejects.toBeInstanceOf(ConflictException);
 		});
 	});
 
@@ -121,10 +119,7 @@ describe("PostRepository", () => {
 			const post = makePost();
 			await repository.create(post);
 
-			const result = await repository.findManyByIds([
-				post.id,
-				"non-existent",
-			]);
+			const result = await repository.findManyByIds([post.id, "non-existent"]);
 
 			expect(result).toEqual([post, null]);
 		});

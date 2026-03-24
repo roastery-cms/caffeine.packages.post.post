@@ -29,9 +29,7 @@
 		"experimentalDecorators": true,
 
 		"paths": {
-			"@/*": ["./src/*"],
-			"elysia": ["./node_modules/elysia/dist/index.d.ts"],
-			"elysia/*": ["./node_modules/elysia/dist/*"]
+			"@/*": ["./src/*"]
 		}
 	}
 }

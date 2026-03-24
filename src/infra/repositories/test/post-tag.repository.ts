@@ -1,5 +1,5 @@
 import type { IPostTagRepository } from "@/domain/types/repositories/post-tag-repository.interface";
-import type { IPostTag } from "@caffeine-packages/post.post-tag/domain/types";
+import type { IPostTag } from "@roastery-capsules/post.post-tag/domain/types";
 
 export class PostTagRepository implements IPostTagRepository {
 	private tags: Map<string, IPostTag> = new Map();

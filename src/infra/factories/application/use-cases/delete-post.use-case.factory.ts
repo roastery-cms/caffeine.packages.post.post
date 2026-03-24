@@ -3,7 +3,10 @@ import type { IPostRepository } from "@/domain/types/repositories";
 import { makeFindPostUseCase } from "./find-post.use-case.factory";
 
 export function makeDeletePostUseCase(
-    postRepository: IPostRepository,
+	postRepository: IPostRepository,
 ): DeletePostUseCase {
-    return new DeletePostUseCase(postRepository, makeFindPostUseCase(postRepository));
+	return new DeletePostUseCase(
+		postRepository,
+		makeFindPostUseCase(postRepository),
+	);
 }

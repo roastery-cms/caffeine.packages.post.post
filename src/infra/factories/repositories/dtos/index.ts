@@ -1,1 +1,2 @@
-export { RepositoryProviderDTO } from "./repository-provider.dto";
+export { PostRepositoryProviderDTO } from "./post-repository-provider.dto";
+export { AggregatesRepositoryProviderDTO } from "./aggregates-repository-provider.dto";

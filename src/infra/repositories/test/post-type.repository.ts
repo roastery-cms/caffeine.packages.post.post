@@ -1,5 +1,5 @@
 import type { IPostTypeRepository } from "@/domain/types/repositories/post-type-repository.interface";
-import type { IPostType } from "@caffeine-packages/post.post-type/domain/types";
+import type { IPostType } from "@roastery-capsules/post.post-type/domain/types";
 
 export class PostTypeRepository implements IPostTypeRepository {
 	private types: Map<string, IPostType> = new Map();

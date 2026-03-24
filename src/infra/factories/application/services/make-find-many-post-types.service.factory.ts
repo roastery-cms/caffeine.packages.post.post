@@ -2,7 +2,7 @@ import { FindManyPostTypesService } from "@/application/services";
 import type { IPostTypeRepository } from "@/domain/types/repositories";
 
 export function makeFindManyPostTypesService(
-    repository: IPostTypeRepository,
+	repository: IPostTypeRepository,
 ): FindManyPostTypesService {
-    return new FindManyPostTypesService(repository);
+	return new FindManyPostTypesService(repository);
 }

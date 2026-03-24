@@ -1,9 +1,9 @@
 import { Post } from "@/domain";
 import type { IPost } from "@/domain/types";
 import type { IPostRepository } from "@/domain/types/repositories/post-repository.interface";
-import { MAX_ITEMS_PER_QUERY } from "@caffeine/constants";
-import { EntitySource } from "@caffeine/entity/symbols";
-import { ConflictException } from "@caffeine/errors/infra";
+import { EntitySource } from "@roastery/beans/entity/symbols";
+import { MAX_ITEMS_PER_QUERY } from "@roastery/seedbed/constants";
+import { ConflictException } from "@roastery/terroir/exceptions/infra";
 
 export class PostRepository implements IPostRepository {
 	private posts: Map<string, IPost> = new Map();
@@ -39,10 +39,7 @@ export class PostRepository implements IPostRepository {
 		return this.paginate(allPosts, page);
 	}
 
-	async findManyByPostType(
-		postTypeId: string,
-		page: number,
-	): Promise<IPost[]> {
+	async findManyByPostType(postTypeId: string, page: number): Promise<IPost[]> {
 		const filteredPosts = Array.from(this.posts.values()).filter(
 			(post) => post.type.id === postTypeId,
 		);

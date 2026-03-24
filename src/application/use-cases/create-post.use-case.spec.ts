@@ -5,17 +5,18 @@ import { PostTagRepository } from "@/infra/repositories/test/post-tag.repository
 import { PostTypeRepository } from "@/infra/repositories/test/post-type.repository";
 import { FindPostTypeService } from "../services/find-post-type.service";
 import { FindManyPostTagsService } from "../services/find-many-post-tags.service";
-import { SlugUniquenessCheckerService } from "@caffeine/domain/services";
+import type { CreatePostDTO } from "../dtos";
+import type { IPostTag } from "@roastery-capsules/post.post-tag/domain/types";
+import { generateUUID } from "@roastery/beans/entity/helpers";
+import type { IPostType } from "@roastery-capsules/post.post-type/domain/types";
+import { SlugUniquenessCheckerService } from "@roastery/seedbed/domain/services";
 import {
 	ResourceAlreadyExistsException,
 	ResourceNotFoundException,
-} from "@caffeine/errors/application";
-import type { IPostTag } from "@caffeine-packages/post.post-tag/domain/types";
-import type { IPostType } from "@caffeine-packages/post.post-type/domain/types";
-import type { CreatePostDTO } from "../dtos";
+} from "@roastery/terroir/exceptions/application";
 
-const TAG_ID = "550e8400-e29b-41d4-a716-446655440001";
-const TYPE_ID = "550e8400-e29b-41d4-a716-446655440002";
+const TAG_ID = generateUUID();
+const TYPE_ID = generateUUID();
 
 const mockPostTag = (overrides?: Partial<IPostTag>): IPostTag =>
 	({
@@ -63,9 +64,7 @@ describe("CreatePostUseCase", () => {
 		postTagRepository = new PostTagRepository();
 		postTypeRepository = new PostTypeRepository();
 
-		const uniquenessChecker = new SlugUniquenessCheckerService(
-			postRepository,
-		);
+		const uniquenessChecker = new SlugUniquenessCheckerService(postRepository);
 		const findPostType = new FindPostTypeService(postTypeRepository);
 		const findManyPostTags = new FindManyPostTagsService(postTagRepository);
 
@@ -103,7 +102,7 @@ describe("CreatePostUseCase", () => {
 
 	it("should throw ResourceNotFoundException when post type does not exist", async () => {
 		const dto = makeCreateDTO({
-			postTypeId: "550e8400-e29b-41d4-a716-446655440099",
+			postTypeId: generateUUID(),
 		});
 
 		expect(sut.run(dto)).rejects.toBeInstanceOf(ResourceNotFoundException);
@@ -111,7 +110,7 @@ describe("CreatePostUseCase", () => {
 
 	it("should throw ResourceNotFoundException when a tag does not exist", async () => {
 		const dto = makeCreateDTO({
-			tags: ["550e8400-e29b-41d4-a716-446655440099"],
+			tags: [generateUUID()],
 		});
 
 		expect(sut.run(dto)).rejects.toBeInstanceOf(ResourceNotFoundException);

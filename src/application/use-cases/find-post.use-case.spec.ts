@@ -1,11 +1,15 @@
 import { describe, expect, it, beforeEach } from "bun:test";
 import { FindPostUseCase } from "./find-post.use-case";
 import { PostRepository } from "@/infra/repositories/test/post.repository";
-import { FindEntityByTypeUseCase } from "@caffeine/application/use-cases";
-import { ResourceNotFoundException } from "@caffeine/errors/application";
 import { Post } from "@/domain";
-import type { IPostTag } from "@caffeine-packages/post.post-tag/domain/types";
-import type { IPostType } from "@caffeine-packages/post.post-type/domain/types";
+import type { IPostTag } from "@roastery-capsules/post.post-tag/domain/types";
+import type { IPostType } from "@roastery-capsules/post.post-type/domain/types";
+import { FindEntityByTypeUseCase } from "@roastery/seedbed/application/use-cases";
+import { ResourceNotFoundException } from "@roastery/terroir/exceptions/application";
+import { generateUUID } from "@roastery/beans/entity/helpers";
+import type { IPostRepository } from "@/domain/types/repositories";
+import type { IPost } from "@/domain/types";
+import type { UnpackedPostDTO } from "@/domain/dtos";
 
 const mockPostTag = (overrides?: Partial<IPostTag>): IPostTag =>
 	({
@@ -39,7 +43,11 @@ describe("FindPostUseCase", () => {
 
 	beforeEach(() => {
 		postRepository = new PostRepository();
-		const findEntityByType = new FindEntityByTypeUseCase(postRepository);
+		const findEntityByType = new FindEntityByTypeUseCase<
+			typeof UnpackedPostDTO,
+			IPost,
+			IPostRepository
+		>(postRepository);
 		sut = new FindPostUseCase(findEntityByType);
 	});
 
@@ -74,9 +82,9 @@ describe("FindPostUseCase", () => {
 	});
 
 	it("should throw ResourceNotFoundException when post is not found by id", async () => {
-		expect(
-			sut.run("550e8400-e29b-41d4-a716-446655440000"),
-		).rejects.toBeInstanceOf(ResourceNotFoundException);
+		expect(sut.run(generateUUID())).rejects.toBeInstanceOf(
+			ResourceNotFoundException,
+		);
 	});
 
 	it("should throw ResourceNotFoundException when post is not found by slug", async () => {

@@ -1,8 +1,8 @@
 import { describe, expect, it, beforeEach } from "bun:test";
 import { FindManyPostTypesService } from "./find-many-post-types.service";
 import { PostTypeRepository } from "@/infra/repositories/test/post-type.repository";
-import { ResourceNotFoundException } from "@caffeine/errors/application";
-import type { IPostType } from "@caffeine-packages/post.post-type/domain/types";
+import type { IPostType } from "@roastery-capsules/post.post-type/domain/types";
+import { ResourceNotFoundException } from "@roastery/terroir/exceptions/application";
 
 const mockPostType = (overrides?: Partial<IPostType>): IPostType =>
 	({

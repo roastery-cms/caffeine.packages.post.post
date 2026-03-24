@@ -1,8 +1,8 @@
 import { describe, expect, it, beforeEach } from "bun:test";
 import { FindPostTagService } from "./find-post-tag.service";
 import { PostTagRepository } from "@/infra/repositories/test/post-tag.repository";
-import { ResourceNotFoundException } from "@caffeine/errors/application";
-import type { IPostTag } from "@caffeine-packages/post.post-tag/domain/types";
+import type { IPostTag } from "@roastery-capsules/post.post-tag/domain/types";
+import { ResourceNotFoundException } from "@roastery/terroir/exceptions/application";
 
 const mockPostTag = (overrides?: Partial<IPostTag>): IPostTag =>
 	({

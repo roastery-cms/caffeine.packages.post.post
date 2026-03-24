@@ -3,17 +3,19 @@ import { UpdatePostUseCase } from "./update-post.use-case";
 import { FindPostUseCase } from "./find-post.use-case";
 import { PostRepository } from "@/infra/repositories/test/post.repository";
 import { PostTagRepository } from "@/infra/repositories/test/post-tag.repository";
-import { FindEntityByTypeUseCase } from "@caffeine/application/use-cases";
 import { FindManyPostTagsService } from "../services/find-many-post-tags.service";
-import { SlugUniquenessCheckerService } from "@caffeine/domain/services";
+import { Post } from "@/domain";
+import type { IPost } from "@/domain/types";
+import type { IPostTag } from "@roastery-capsules/post.post-tag/domain/types";
+import type { IPostType } from "@roastery-capsules/post.post-type/domain/types";
+import { FindEntityByTypeUseCase } from "@roastery/seedbed/application/use-cases";
+import { SlugUniquenessCheckerService } from "@roastery/seedbed/domain/services";
 import {
 	ResourceAlreadyExistsException,
 	ResourceNotFoundException,
-} from "@caffeine/errors/application";
-import { Post } from "@/domain";
-import type { IPost } from "@/domain/types";
-import type { IPostTag } from "@caffeine-packages/post.post-tag/domain/types";
-import type { IPostType } from "@caffeine-packages/post.post-type/domain/types";
+} from "@roastery/terroir/exceptions/application";
+import type { IPostRepository } from "@/domain/types/repositories";
+import type { UnpackedPostDTO } from "@/domain/dtos";
 
 const mockPostTag = (overrides?: Partial<IPostTag>): IPostTag =>
 	({
@@ -54,12 +56,14 @@ describe("UpdatePostUseCase", () => {
 		postRepository = new PostRepository();
 		postTagRepository = new PostTagRepository();
 
-		const findEntityByType = new FindEntityByTypeUseCase(postRepository);
+		const findEntityByType = new FindEntityByTypeUseCase<
+			typeof UnpackedPostDTO,
+			IPost,
+			IPostRepository
+		>(postRepository);
 		const findPost = new FindPostUseCase(findEntityByType);
 		const findManyPostTags = new FindManyPostTagsService(postTagRepository);
-		const uniquenessChecker = new SlugUniquenessCheckerService(
-			postRepository,
-		);
+		const uniquenessChecker = new SlugUniquenessCheckerService(postRepository);
 
 		sut = new UpdatePostUseCase(
 			postRepository,
@@ -159,9 +163,9 @@ describe("UpdatePostUseCase", () => {
 	});
 
 	it("should throw ResourceNotFoundException when post does not exist", async () => {
-		expect(
-			sut.run("non-existent", { name: "Test" }),
-		).rejects.toBeInstanceOf(ResourceNotFoundException);
+		expect(sut.run("non-existent", { name: "Test" })).rejects.toBeInstanceOf(
+			ResourceNotFoundException,
+		);
 	});
 
 	it("should throw ResourceNotFoundException when a tag does not exist", async () => {

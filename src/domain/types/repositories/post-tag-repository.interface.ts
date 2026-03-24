@@ -1,5 +1,5 @@
-import type { IPostTag } from "@caffeine-packages/post.post-tag/domain/types";
+import type { IPostTag } from "@roastery-capsules/post.post-tag/domain/types";
 
 export interface IPostTagRepository {
-    find(idOrSlug: string): Promise<IPostTag | null>;
+	find(idOrSlug: string): Promise<IPostTag | null>;
 }

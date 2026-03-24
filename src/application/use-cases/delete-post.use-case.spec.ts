@@ -2,15 +2,19 @@ import { describe, expect, it, beforeEach } from "bun:test";
 import { DeletePostUseCase } from "./delete-post.use-case";
 import { FindPostUseCase } from "./find-post.use-case";
 import { PostRepository } from "@/infra/repositories/test/post.repository";
-import { FindEntityByTypeUseCase } from "@caffeine/application/use-cases";
-import { ResourceNotFoundException } from "@caffeine/errors/application";
 import { Post } from "@/domain";
-import type { IPostTag } from "@caffeine-packages/post.post-tag/domain/types";
-import type { IPostType } from "@caffeine-packages/post.post-type/domain/types";
+import type { IPostTag } from "@roastery-capsules/post.post-tag/domain/types";
+import type { IPostType } from "@roastery-capsules/post.post-type/domain/types";
+import { FindEntityByTypeUseCase } from "@roastery/seedbed/application/use-cases";
+import { ResourceNotFoundException } from "@roastery/terroir/exceptions/application";
+import type { UnpackedPostDTO } from "@/domain/dtos";
+import type { IPost } from "@/domain/types";
+import type { IPostRepository } from "@/domain/types/repositories";
+import { generateUUID } from "@roastery/beans/entity/helpers";
 
 const mockPostTag = (overrides?: Partial<IPostTag>): IPostTag =>
 	({
-		id: "tag-id",
+		id: generateUUID(),
 		name: "Tech",
 		slug: "tech",
 		hidden: false,
@@ -23,7 +27,7 @@ const mockPostTag = (overrides?: Partial<IPostTag>): IPostTag =>
 
 const mockPostType = (overrides?: Partial<IPostType>): IPostType =>
 	({
-		id: "type-id",
+		id: generateUUID(),
 		name: "Blog",
 		slug: "blog",
 		isHighlighted: true,
@@ -40,7 +44,11 @@ describe("DeletePostUseCase", () => {
 
 	beforeEach(() => {
 		postRepository = new PostRepository();
-		const findEntityByType = new FindEntityByTypeUseCase(postRepository);
+		const findEntityByType = new FindEntityByTypeUseCase<
+			typeof UnpackedPostDTO,
+			IPost,
+			IPostRepository
+		>(postRepository);
 		const findPost = new FindPostUseCase(findEntityByType);
 		sut = new DeletePostUseCase(postRepository, findPost);
 	});

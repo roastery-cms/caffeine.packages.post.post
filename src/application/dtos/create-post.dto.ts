@@ -1,4 +1,4 @@
-import { t } from "@caffeine/models";
+import { t } from "@roastery/terroir";
 
 export const CreatePostDTO = t.Object(
 	{
